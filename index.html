@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>WhatsApp Response Bank</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+box-sizing:border-box;
+}
+
+body{
+font-family:'Inter',sans-serif;
+margin:0;
+background:#f5f7fb;
+color:#1f2937;
+}
+
+/* HEADER */
+
+.header{
+height:70px;
+background:white;
+border-bottom:1px solid #e5e7eb;
+display:flex;
+align-items:center;
+padding:0 28px;
+font-size:18px;
+font-weight:600;
+}
+
+/* LAYOUT */
+
+.container{
+display:flex;
+height:calc(100vh - 70px);
+}
+
+/* SIDEBAR */
+
+.sidebar{
+width:340px;
+background:white;
+border-right:1px solid #e5e7eb;
+display:flex;
+flex-direction:column;
+}
+
+/* SEARCH */
+
+.search{
+padding:14px;
+border-bottom:1px solid #f1f1f1;
+}
+
+.search input{
+width:100%;
+padding:10px 12px;
+border-radius:8px;
+border:1px solid #d1d5db;
+font-size:14px;
+transition:all .2s;
+}
+
+.search input:focus{
+outline:none;
+border-color:#2563eb;
+box-shadow:0 0 0 2px rgba(37,99,235,0.1);
+}
+
+/* RESPONSE LIST */
+
+.responses{
+overflow:auto;
+flex:1;
+}
+
+.response{
+padding:16px 18px;
+border-bottom:1px solid #f2f2f2;
+cursor:pointer;
+transition:all .15s;
+font-size:14px;
+}
+
+.response:hover{
+background:#f8fafc;
+padding-left:22px;
+}
+
+/* MAIN */
+
+.main{
+flex:1;
+padding:35px;
+display:flex;
+flex-direction:column;
+}
+
+.title{
+font-size:18px;
+font-weight:600;
+margin-bottom:10px;
+}
+
+/* MESSAGE BOX */
+
+textarea{
+width:100%;
+flex:1;
+border-radius:10px;
+border:1px solid #d1d5db;
+padding:16px;
+font-size:14px;
+line-height:1.5;
+resize:none;
+background:white;
+}
+
+/* COPY BUTTON */
+
+button{
+margin-top:15px;
+align-self:flex-start;
+background:#25D366;
+border:none;
+padding:11px 20px;
+border-radius:8px;
+color:white;
+font-weight:500;
+cursor:pointer;
+transition:all .2s;
+}
+
+button:hover{
+background:#1ebe5d;
+transform:translateY(-1px);
+box-shadow:0 3px 10px rgba(0,0,0,0.08);
+}
+
+/* SCROLLBAR */
+
+.responses::-webkit-scrollbar{
+width:6px;
+}
+
+.responses::-webkit-scrollbar-thumb{
+background:#d1d5db;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+University WhatsApp Response Bank
+</div>
+
+<div class="container">
+
+<div class="sidebar">
+
+<div class="search">
+<input id="search" placeholder="Search responses...">
+</div>
+
+<div class="responses" id="list"></div>
+
+</div>
+
+<div class="main">
+
+<div class="title">WhatsApp Message</div>
+
+<textarea id="output" placeholder="Select a response from the list..."></textarea>
+
+<button onclick="copy()">Copy for WhatsApp</button>
+
+</div>
+
+</div>
+
+<script>
+
+const supabaseClient = supabase.createClient(
+"https://vpuwpgwonvgczbsehboa.supabase.co",
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwdXdwZ3dvbnZnY3pic2VoYm9hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjU1NjQsImV4cCI6MjA4ODgwMTU2NH0.PK-D0NSBKCPUOTQxcDIIEeU0Goa5AotV_fB-baw062c"
+);
+
+let responses=[];
+
+loadResponses();
+
+async function loadResponses(){
+
+let {data,error}=await supabaseClient
+.from("responses")
+.select("*")
+.order("title");
+
+if(error){
+console.error(error);
+return;
+}
+
+responses=data;
+
+renderList(responses);
+
+}
+
+function renderList(data){
+
+let list=document.getElementById("list");
+list.innerHTML="";
+
+data.forEach(r=>{
+
+let div=document.createElement("div");
+
+div.className="response";
+div.innerText=r.title;
+
+div.onclick=()=>show(r.response);
+
+list.appendChild(div);
+
+});
+
+}
+
+document.getElementById("search").addEventListener("input",function(){
+
+let term=this.value.toLowerCase();
+
+let filtered=responses.filter(r=>
+r.title.toLowerCase().includes(term)
+);
+
+renderList(filtered);
+
+});
+
+function show(text){
+
+text=text
+.replace(/\n{3,}/g,"\n\n")
+.replace(/•/g,"\n• ");
+
+document.getElementById("output").value=text;
+
+}
+
+function copy(){
+
+let t=document.getElementById("output");
+
+t.select();
+
+document.execCommand("copy");
+
+alert("Copied for WhatsApp");
+
+}
+
+</script>
+
+</body>
+</html>
